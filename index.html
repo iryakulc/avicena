@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Informasi Sekolah</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+  :root {
+    --primary: #4285f4; --primary-dark: #3367d6;
+    --success: #34a853; --danger: #ea4335; --warning: #fbbc04;
+    --bg: #f5f7fb; --card: #ffffff; --text: #202124;
+    --text-light: #5f6368; --border: #dadce0;
+    --sidebar: #1a237e; --sidebar-hover: #283593;
+  }
+  body { background: var(--bg); color: var(--text); }
+
+  /* ============ LOGIN ============ */
+  .login-page {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #4285f4 0%, #1a237e 100%); padding: 20px;
+  }
+  .login-card {
+    background: white; border-radius: 16px; padding: 40px; width: 100%;
+    max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .login-logo {
+    width: 80px; height: 80px; background: linear-gradient(135deg,#4285f4,#1a237e);
+    border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center;
+    justify-content: center; color: white; font-size: 36px; font-weight: bold;
+  }
+  .login-card h1 { text-align: center; margin-bottom: 8px; font-size: 24px; }
+  .login-card p.sub { text-align: center; color: var(--text-light); margin-bottom: 30px; font-size: 14px; }
+
+  /* ============ FORM ============ */
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block; margin-bottom: 6px; font-size: 13px;
+    font-weight: 600; color: var(--text-light);
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-size: 14px; transition: all .2s; background: #fafbfc;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none; border-color: var(--primary); background: white;
+    box-shadow: 0 0 0 3px rgba(66,133,244,0.15);
+  }
+
+  /* ============ BUTTON ============ */
+  .btn {
+    padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: all .2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-warning { background: var(--warning); color: #333; }
+  .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+  .btn-outline:hover { background: var(--primary); color: white; }
+  .btn-block { width: 100%; justify-content: center; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* ============ LAYOUT ============ */
+  .app-layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px; background: var(--sidebar); color: white; padding: 20px 0;
+    position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto;
+    transition: transform .3s; z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sidebar-brand .logo {
+    width: 42px; height: 42px; background: var(--primary); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px;
+  }
+  .sidebar-brand h2 { font-size: 16px; font-weight: 600; }
+  .sidebar-brand small { font-size: 11px; opacity: 0.7; display: block; }
+  .sidebar-menu { padding: 16px 12px; list-style: none; }
+  .sidebar-menu li { margin-bottom: 2px; }
+  .sidebar-menu a {
+    display: flex; align-items: center; gap: 12px; padding: 11px 14px;
+    color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 8px;
+    font-size: 14px; cursor: pointer; transition: all .2s;
+  }
+  .sidebar-menu a:hover { background: var(--sidebar-hover); color: white; }
+  .sidebar-menu a.active { background: var(--primary); color: white; }
+  .sidebar-menu .icon { font-size: 18px; width: 22px; text-align: center; }
+  .sidebar-section {
+    padding: 16px 24px 8px; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 1px; color: rgba(255,255,255,0.5);
+  }
+
+  .main-content { margin-left: 260px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+  .topbar {
+    background: white; padding: 14px 24px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar h1 { font-size: 20px; font-weight: 600; }
+  .topbar .user-info { display: flex; align-items: center; gap: 12px; }
+  .user-avatar {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--primary);
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 16px;
+  }
+  .user-detail { line-height: 1.2; text-align: right; }
+  .user-detail .name { font-size: 14px; font-weight: 600; }
+  .user-detail .role { font-size: 11px; color: var(--text-light); text-transform: uppercase; }
+  .menu-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text); }
+
+  .content-area { padding: 24px; flex: 1; }
+
+  /* ============ CARD ============ */
+  .card {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px;
+  }
+  .card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+  }
+  .card-header h3 { font-size: 16px; font-weight: 600; }
+
+  /* ============ STATS ============ */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 24px;
+  }
+  .stat-card {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex; align-items: center; gap: 16px; transition: transform .2s;
+  }
+  .stat-card:hover { transform: translateY(-3px); }
+  .stat-icon {
+    width: 56px; height: 56px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: white; flex-shrink: 0;
+  }
+  .stat-info .value { font-size: 26px; font-weight: 700; }
+  .stat-info .label { font-size: 13px; color: var(--text-light); }
+
+  /* ============ TABLE ============ */
+  .table-wrap { overflow-x: auto; border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table th {
+    background: #f8f9fc; padding: 12px; text-align: left;
+    font-weight: 600; color: var(--text-light); font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border); white-space: nowrap;
+  }
+  table td { padding: 12px; border-bottom: 1px solid var(--border); }
+  table tbody tr:hover { background: #f8f9fc; }
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-success { background: #e6f4ea; color: #137333; }
+  .badge-danger { background: #fce8e6; color: #c5221f; }
+  .badge-warning { background: #fef7e0; color: #b06000; }
+  .badge-info { background: #e8f0fe; color: #1967d2; }
+
+  /* ============ MODAL ============ */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 1000; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: white; border-radius: 12px; width: 100%; max-width: 560px;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-header {
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-header h3 { font-size: 17px; }
+  .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light); line-height: 1; }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer {
+    padding: 16px 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+
+  /* ============ TOAST ============ */
+  #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+  .toast {
+    padding: 14px 18px; border-radius: 8px; color: white; font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 260px;
+  }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+  .toast.info { background: var(--primary); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+
+  .loader {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .filter-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-row input, .filter-row select {
+    padding: 10px 14px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-size: 14px; flex: 1; min-width: 180px;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main-content { margin-left: 0; }
+    .menu-toggle { display: block; }
+    .user-detail { display: none; }
+    .content-area { padding: 16px; }
+    .topbar h1 { font-size: 16px; }
+    .stat-info .value { font-size: 22px; }
+  }
+
+  .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+  .sidebar-backdrop.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ==================== LOGIN PAGE ==================== -->
+<div id="loginPage" class="login-page">
+  <div class="login-card">
+    <div class="login-logo">🎓</div>
+    <h1>Sistem Informasi Sekolah</h1>
+    <p class="sub">Silakan login untuk melanjutkan</p>
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="loginUsername" placeholder="Masukkan username" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="Masukkan password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="loginBtn">🔐 Login</button>
+    </form>
+    <div style="margin-top:20px; padding:14px; background:#f0f4ff; border-radius:8px; font-size:12px; color:#5f6368;">
+      <strong>Demo Login:</strong><br>
+      👤 admin / admin123<br>
+      👨‍🏫 guru / guru123<br>
+      🎒 siswa / siswa123
+    </div>
+  </div>
+</div>
+
+<!-- ==================== APP LAYOUT ==================== -->
+<div id="appLayout" class="app-layout" style="display:none;">
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo">🎓</div>
+      <div><h2>SIAKAD</h2><small>Sistem Sekolah</small></div>
+    </div>
+    <ul class="sidebar-menu" id="sidebarMenu"></ul>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="user-info">
+        <div class="user-detail">
+          <div class="name" id="userName">User</div>
+          <div class="role" id="userRole">role</div>
+        </div>
+        <div class="user-avatar" id="userAvatar">U</div>
+        <button class="btn btn-outline btn-sm" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+    <div class="content-area" id="contentArea"></div>
+  </div>
+</div>
+
+<!-- ==================== MODAL ==================== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Modal</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+/* ============================================================
+   🔧 KONFIGURASI API — URL WEB APP APPS SCRIPT ANDA
+============================================================ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbw6DdS_X_YDRhOs0kHdj4fcxrlMFbCBqxPbIUEfAn-4JFHOfPikVGSndI7kq5AEYEF8/exec';
+
+/* ============================================================
+   GLOBAL STATE
+============================================================ */
+let currentUser = null;
+let appData = { siswa: [], guru: [], kelas: [], mapel: [], nilai: [], absensi: [], pengumuman: [] };
+let currentPage = 'dashboard';
+
+/* ============================================================
+   SERVER COMMUNICATION via FETCH
+============================================================ */
+async function callServer(fn, ...args) {
+  const actionMap = {
+    'login': 'login',
+    'register': 'register',
+    'getAll': 'getAll',
+    'getById': 'getById',
+    'insertData': 'insert',
+    'updateData': 'update',
+    'deleteData': 'delete',
+    'getDashboardStats': 'getDashboardStats',
+    'getPengumuman': 'getPengumuman',
+    'getNilaiBySiswa': 'getNilaiBySiswa',
+    'getAbsensiBySiswa': 'getAbsensiBySiswa',
+    'initDatabase': 'initDatabase'
+  };
+  const action = actionMap[fn] || fn;
+  const params = new URLSearchParams();
+  params.append('action', action);
+
+  if (fn === 'login') {
+    params.append('username', args[0]);
+    params.append('password', args[1]);
+  } else if (fn === 'register') {
+    params.append('payload', JSON.stringify(args[0]));
+  } else if (fn === 'getAll' || fn === 'getById') {
+    params.append('sheet', args[0]);
+    if (fn === 'getById') params.append('id', args[1]);
+  } else if (fn === 'insertData') {
+    params.append('sheet', args[0]);
+    params.append('payload', JSON.stringify({ data: args[1] }));
+  } else if (fn === 'updateData') {
+    params.append('sheet', args[0]);
+    params.append('id', args[1]);
+    params.append('payload', JSON.stringify({ data: args[2] }));
+  } else if (fn === 'deleteData') {
+    params.append('sheet', args[0]);
+    params.append('id', args[1]);
+  } else if (fn === 'getPengumuman') {
+    if (args[0]) params.append('target', args[0]);
+  } else if (fn === 'getNilaiBySiswa' || fn === 'getAbsensiBySiswa') {
+    params.append('nis', args[0]);
+  }
+
+  try {
+    const url = API_URL + '?' + params.toString();
+    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (err) {
+    console.error('API Error:', err);
+    return { success: false, message: 'Gagal koneksi ke server: ' + err.message };
+  }
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+function toast(msg, type = 'info', duration = 3000) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity .3s, transform .3s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(120%)';
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
+
+/* ============================================================
+   AUTH
+============================================================ */
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  btn.innerHTML = '<span class="loader"></span> Loading...';
+  btn.disabled = true;
+
+  const res = await callServer('login', username, password);
+  if (!res.success) {
+    toast(res.message, 'error');
+    btn.innerHTML = '🔐 Login';
+    btn.disabled = false;
+    return;
+  }
+  currentUser = res.data;
+  localStorage.setItem('schoolUser', JSON.stringify(currentUser));
+  toast('Selamat datang, ' + currentUser.nama, 'success');
+  showApp();
+}
+
+function handleLogout() {
+  if (!confirm('Yakin ingin logout?')) return;
+  localStorage.removeItem('schoolUser');
+  currentUser = null;
+  document.getElementById('appLayout').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginForm').reset();
+  toast('Logout berhasil', 'info');
+}
+
+function checkSession() {
+  const saved = localStorage.getItem('schoolUser');
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      showApp();
+      return true;
+    } catch (e) { localStorage.removeItem('schoolUser'); }
+  }
+  return false;
+}
+
+function showApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appLayout').style.display = 'flex';
+  document.getElementById('userName').textContent = currentUser.nama;
+  document.getElementById('userRole').textContent = currentUser.role;
+  document.getElementById('userAvatar').textContent = currentUser.nama.charAt(0).toUpperCase();
+  buildMenu();
+  loadPage('dashboard');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarBackdrop').classList.toggle('active');
+}
+
+/* ============================================================
+   MENU
+============================================================ */
+const MENUS = {
+  admin: [
+    { section: 'Utama' },
+    { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+    { section: 'Manajemen' },
+    { id: 'siswa', icon: '🎒', label: 'Data Siswa' },
+    { id: 'guru', icon: '👨‍🏫', label: 'Data Guru' },
+    { id: 'kelas', icon: '🏫', label: 'Data Kelas' },
+    { id: 'mapel', icon: '📚', label: 'Mata Pelajaran' },
+    { section: 'Akademik' },
+    { id: 'nilai', icon: '📝', label: 'Nilai' },
+    { id: 'absensi', icon: '✅', label: 'Absensi' },
+    { id: 'pengumuman', icon: '📢', label: 'Pengumuman' },
+    { section: 'Sistem' },
+    { id: 'users', icon: '👥', label: 'Manajemen User' }
+  ],
+  guru: [
+    { section: 'Utama' },
+    { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+    { section: 'Akademik' },
+    { id: 'siswa', icon: '🎒', label: 'Data Siswa' },
+    { id: 'nilai', icon: '📝', label: 'Input Nilai' },
+    { id: 'absensi', icon: '✅', label: 'Absensi' },
+    { id: 'pengumuman', icon: '📢', label: 'Pengumuman' }
+  ],
+  siswa: [
+    { section: 'Utama' },
+    { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+    { section: 'Akademik' },
+    { id: 'nilai', icon: '📝', label: 'Nilai Saya' },
+    { id: 'absensi', icon: '✅', label: 'Absensi Saya' },
+    { id: 'pengumuman', icon: '📢', label: 'Pengumuman' }
+  ]
+};
+
+function buildMenu() {
+  const role = currentUser.role || 'siswa';
+  const menu = MENUS[role] || MENUS.siswa;
+  document.getElementById('sidebarMenu').innerHTML = menu.map(item => {
+    if (item.section) return `<div class="sidebar-section">${item.section}</div>`;
+    return `<li><a onclick="loadPage('${item.id}')" id="menu-${item.id}">
+      <span class="icon">${item.icon}</span><span>${item.label}</span></a></li>`;
+  }).join('');
+}
+
+/* ============================================================
+   PAGE ROUTER
+============================================================ */
+async function loadPage(pageId) {
+  currentPage = pageId;
+  document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+  const activeMenu = document.getElementById('menu-' + pageId);
+  if (activeMenu) activeMenu.classList.add('active');
+
+  const content = document.getElementById('contentArea');
+  content.innerHTML = '<div class="empty-state"><div class="icon">⏳</div><p>Memuat data...</p></div>';
+
+  if (window.innerWidth <= 768) toggleSidebar();
+
+  try {
+    switch(pageId) {
+      case 'dashboard': await renderDashboard(); break;
+      case 'siswa': await renderSiswa(); break;
+      case 'guru': await renderGuru(); break;
+      case 'kelas': await renderKelas(); break;
+      case 'mapel': await renderMapel(); break;
+      case 'nilai': await renderNilai(); break;
+      case 'absensi': await renderAbsensi(); break;
+      case 'pengumuman': await renderPengumuman(); break;
+      case 'users': await renderUsers(); break;
+      default: content.innerHTML = '<div class="empty-state">Halaman tidak ditemukan</div>';
+    }
+  } catch (err) {
+    content.innerHTML = `<div class="card"><div class="empty-state"><div class="icon">⚠️</div><p>Error: ${err.message}</p></div></div>`;
+  }
+}
+
+function setTitle(title) { document.getElementById('pageTitle').textContent = title; }
+
+/* ============================================================
+   DASHBOARD
+============================================================ */
+async function renderDashboard() {
+  setTitle('Dashboard');
+  const res = await callServer('getDashboardStats');
+  const s = res.success ? res.data : {totalSiswa:0,totalGuru:0,totalKelas:0,totalMapel:0,siswaLaki:0,siswaPerempuan:0};
+  const peng = await callServer('getPengumuman', currentUser.role);
+  const pengumumanList = peng.success ? peng.data.slice(0, 5) : [];
+
+  document.getElementById('contentArea').innerHTML = `
+    <div class="stats-grid">
+      ${statCard('🎒', s.totalSiswa, 'Total Siswa', '#4285f4')}
+      ${statCard('👨‍🏫', s.totalGuru, 'Total Guru', '#34a853')}
+      ${statCard('🏫', s.totalKelas, 'Total Kelas', '#fbbc04')}
+      ${statCard('📚', s.totalMapel, 'Mata Pelajaran', '#ea4335')}
+    </div>
+    <div class="stats-grid">
+      ${statCard('👦', s.siswaLaki, 'Siswa Laki-laki', '#9c27b0')}
+      ${statCard('👧', s.siswaPerempuan, 'Siswa Perempuan', '#e91e63')}
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h3>📢 Pengumuman Terbaru</h3>
+        <button class="btn btn-outline btn-sm" onclick="loadPage('pengumuman')">Lihat Semua</button>
+      </div>
+      ${pengumumanList.length === 0
+        ? '<div class="empty-state"><div class="icon">📭</div><p>Belum ada pengumuman</p></div>'
+        : pengumumanList.map(p => `
+          <div style="padding:12px 0; border-bottom:1px solid var(--border);">
+            <div style="font-weight:600; margin-bottom:4px;">${esc(p.judul)}</div>
+            <div style="font-size:13px; color:var(--text-light); margin-bottom:4px;">${esc(p.isi)}</div>
+            <div style="font-size:11px; color:var(--text-light);">${formatDate(p.tanggal)} • ${esc(p.penulis)}</div>
+          </div>`).join('')}
+    </div>`;
+}
+
+function statCard(icon, value, label, color) {
+  return `<div class="stat-card">
+      <div class="stat-icon" style="background:${color}">${icon}</div>
+      <div class="stat-info">
+        <div class="value">${value}</div>
+        <div class="label">${label}</div>
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   SISWA
+============================================================ */
+async function renderSiswa() {
+  setTitle('Data Siswa');
+  const res = await callServer('getAll', 'Siswa');
+  appData.siswa = res.success ? res.data : [];
+  const canEdit = currentUser.role === 'admin';
+
+  document.getElementById('contentArea').innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <h3>🎒 Daftar Siswa (${appData.siswa.length})</h3>
+        ${canEdit ? '<button class="btn btn-primary" onclick="openFormSiswa()">+ Tambah Siswa</button>' : ''}
+      </div>
+      <div class="filter-row">
+        <input type="text" placeholder="🔍 Cari nama/NIS..." oninput="filterTable('siswaTable', this.value)">
+      </div>
+      <div class="table-wrap">
+        <table id="siswaTable">
+          <thead><tr><th>NIS</th><th>Nama</th><th>L/P</th><th>Kelas</th><th>Telepon</th><th>Wali</th>${canEdit?'<th>Aksi</th>':''}</tr></thead>
+          <tbody>
+            ${appData.siswa.length === 0
+              ? `<tr><td colspan="${canEdit?7:6}"><div class="empty-state"><div class="icon">📭</div><p>Belum ada data siswa</p></div></td></tr>`
+              : appData.siswa.map(s => `<tr>
+                  <td><strong>${esc(s.nis)}</strong></td>
+                  <td>${esc(s.nama)}</td>
+                  <td><span class="badge ${s.jenis_kelamin==='L'?'badge-info':'badge-warning'}">${esc(s.jenis_kelamin)}</span></td>
+                  <td>${esc(s.kelas)}</td>
+                  <td>${esc(s.telepon)}</td>
+                  <td>${esc(s.nama_wali)}</td>
+                  ${canEdit ? `<td>
+                    <button class="btn btn-warning btn-sm" onclick="openFormSiswa('${s.id}')">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusData('Siswa','${s.id}','siswa')">Hapus</button>
+                  </td>`:''}
+                </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function openFormSiswa(id) {
+  const d = id ? appData.siswa.find(s => String(s.id) === String(id)) : {};
+  openModal(id ? 'Edit Siswa' : 'Tambah Siswa', `
+    <div class="form-group"><label>NIS *</label><input id="f_nis" value="${esc(d.nis||'')}"></div>
+    <div class="form-group"><label>Nama *</label><input id="f_nama" value="${esc(d.nama||'')}"></div>
+    <div class="form-group"><label>Jenis Kelamin</label>
+      <select id="f_jk">
+        <option value="L" ${d.jenis_kelamin==='L'?'selected':''}>Laki-laki</option>
+        <option value="P" ${d.jenis_kelamin==='P'?'selected':''}>Perempuan</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Tanggal Lahir</label><input type="date" id="f_tgl" value="${esc(d.tanggal_lahir||'')}"></div>
+    <div class="form-group"><label>Kelas</label><input id="f_kelas" value="${esc(d.kelas||'')}"></div>
+    <div class="form-group"><label>Alamat</label><textarea id="f_alamat" rows="2">${esc(d.alamat||'')}</textarea></div>
+    <div class="form-group"><label>Telepon</label><input id="f_telp" value="${esc(d.telepon||'')}"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="f_email" value="${esc(d.email||'')}"></div>
+    <div
